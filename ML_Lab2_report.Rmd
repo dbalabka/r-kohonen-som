@@ -1,0 +1,77 @@
+---
+title: "\"Maschine Learning Introduction\" course laboratory work 2"
+output: html_document
+---
+```{r echo=FALSE}
+library(knitr)
+library(kohonen) 
+opts_chunk$set(
+  #cache.path = "../../../target/cache/",
+  message = FALSE, tidy = FALSE,
+  #fig.path = "../../../target/figures/",
+  #base.dir = "../../../target/",
+  animation.fun = hook_r2swf
+)
+```
+
+Following libraries will be used
+```{r}
+source('./my_kohonen_som.R')
+```
+Set random seed for reproducible experiments.
+```{r}
+set.seed(1)
+```
+
+# Kohonen Neural Network use to solve clusterization problem
+
+For neural network learning will be used Iris data set. This is perhaps the best known database to be found in the pattern recognition literature. The data set contains 3 classes of 50 instances each, where each class refers to a type of iris plant. One class is linearly separable from the other 2; the latter are NOT linearly separable from each other. 
+
+Source: https://archive.ics.uci.edu/ml/datasets/Iris
+```{r}
+data(iris)
+```
+
+## Basic Kohonen network implementation learning
+```{r}
+data <- iris[,1:4]
+network <- my_kohonen_som(data[sample(nrow(data)),], learnRate=0.5);
+```
+
+```{r}
+predictionResult <- my_kohonen_som.predict(network, scale(data))
+```
+
+### Prediction result (total determined clusters count is **`r length(unique(predictionResult))`**)
+
+```{r kable, echo=FALSE}
+predictTable <- table(predictionResult, iris[,5])
+kable(predictTable)
+```
+
+### Self--organizing map (SOM) network learning
+```{r}
+train.obs <- sample(nrow(iris), 50) # get the training set observations
+train.set <- scale(iris[train.obs,][,-5]) # check info about scaling data below
+test.set  <- scale(iris[-train.obs, ][-5],
+                   center = attr(train.set, "scaled:center"),
+                   scale  = attr(train.set, "scaled:scale"))
+som.iris <- som(train.set, grid = somgrid(5, 5, "hexagonal"))
+```
+
+```{r}
+plot(som.iris)
+```
+
+```{r}
+som.prediction <- 
+  predict(som.iris, newdata = test.set,
+          trainX = train.set,
+          trainY = classvec2classmat(iris[,5][train.obs]))
+```
+
+### Prediction result (total determined clusters count is **`r ncol(som.prediction)`**)
+```{r kable1, echo=FALSE}
+kable(table(iris[,5][-train.obs], som.prediction$prediction))
+```
+
