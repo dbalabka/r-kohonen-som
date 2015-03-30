@@ -1,5 +1,5 @@
 ---
-title: "\"Maschine Learning Introduction\" course laboratory work 2"
+title: "\"Machine Learning Introduction\" course laboratory work 2"
 output: html_document
 ---
 ```{r echo=FALSE}
